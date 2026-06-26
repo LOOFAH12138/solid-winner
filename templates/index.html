@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中医药科学大数据管理平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=LXGW+WenKai:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- 引入 marked.js 用于 Markdown 渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+</head>
+<body>
+    <!-- 侧边导航 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">&#33647;</div>
+            <h1 class="logo-text">中医药数据平台</h1>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" data-page="dashboard">
+                <span class="nav-icon">&#9776;</span>
+                <span class="nav-label">数据总览</span>
+            </li>
+            <li class="nav-item" data-page="herbs">
+                <span class="nav-icon">&#33647;</span>
+                <span class="nav-label">中药药材</span>
+            </li>
+            <li class="nav-item" data-page="prescriptions">
+                <span class="nav-icon">&#128196;</span>
+                <span class="nav-label">方剂管理</span>
+            </li>
+            <li class="nav-item" data-page="components">
+                <span class="nav-icon">&#9883;</span>
+                <span class="nav-label">化学成分</span>
+            </li>
+            <li class="nav-item" data-page="pharmacology">
+                <span class="nav-icon">&#128300;</span>
+                <span class="nav-label">药理学</span>
+            </li>
+            <li class="nav-item" data-page="import">
+                <span class="nav-icon">&#10514;</span>
+                <span class="nav-label">数据导入</span>
+            </li>
+            <li class="nav-divider"></li>
+            <li class="nav-item" data-page="diseases">
+                <span class="nav-icon">&#9764;</span>
+                <span class="nav-label">病症管理</span>
+            </li>
+            <li class="nav-item" data-page="graph">
+                <span class="nav-icon">&#9733;</span>
+                <span class="nav-label">知识图谱</span>
+            </li>
+            <li class="nav-item" data-page="qa">
+                <span class="nav-icon">&#128172;</span>
+                <span class="nav-label">智能问答</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <span class="footer-text">科学大数据管理</span>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <main class="main-content">
+        <!-- 仪表盘 -->
+        <section class="page active" id="page-dashboard">
+            <div class="page-header">
+                <h2>数据总览</h2>
+                <p class="page-subtitle">中医药科学数据全景概览</p>
+            </div>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon herb-icon">&#33647;</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-herbs">-</span>
+                        <span class="stat-label">药材总数</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pres-icon">&#128196;</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-prescriptions">-</span>
+                        <span class="stat-label">方剂总数</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon comp-icon">&#9883;</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-components">-</span>
+                        <span class="stat-label">化学成分</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon study-icon">&#9764;</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-diseases">-</span>
+                        <span class="stat-label">病症总数</span>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card card-chart">
+                    <h3 class="card-title">药材性味分布</h3>
+                    <canvas id="tasteChart" width="300" height="300"></canvas>
+                </div>
+                <div class="card card-timeline">
+                    <h3 class="card-title">最近录入动态</h3>
+                    <div class="timeline" id="timeline"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 药材管理 -->
+        <section class="page" id="page-herbs">
+            <div class="page-header">
+                <h2>中药药材管理</h2>
+                <p class="page-subtitle">管理药材信息，支持搜索、筛选与增删改查</p>
+            </div>
+            <div class="toolbar">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="herb-search" placeholder="搜索药材名称、拉丁名、功效...">
+                    <select class="filter-select" id="herb-filter-nature">
+                        <option value="">全部四气</option>
+                        <option value="寒">寒</option>
+                        <option value="热">热</option>
+                        <option value="温">温</option>
+                        <option value="凉">凉</option>
+                        <option value="平">平</option>
+                    </select>
+                    <select class="filter-select" id="herb-filter-taste">
+                        <option value="">全部五味</option>
+                        <option value="酸">酸</option>
+                        <option value="苦">苦</option>
+                        <option value="甘">甘</option>
+                        <option value="辛">辛</option>
+                        <option value="咸">咸</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="HerbsPage.openForm()">+ 新增药材</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="herb-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>拉丁名</th>
+                            <th>分类</th>
+                            <th>四气</th>
+                            <th>五味</th>
+                            <th>归经</th>
+                            <th>拼音</th>
+                            <th>英文名</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="herb-pagination"></div>
+        </section>
+
+        <!-- 方剂管理 -->
+        <section class="page" id="page-prescriptions">
+            <div class="page-header">
+                <h2>方剂管理</h2>
+                <p class="page-subtitle">管理中药方剂，关联组成药材</p>
+            </div>
+            <div class="toolbar">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="pres-search" placeholder="搜索方剂名称、主治...">
+                    <select class="filter-select" id="pres-filter-efficacy">
+                        <option value="">全部功效</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="PrescriptionsPage.openForm()">+ 新增方剂</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="pres-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>功效</th>
+                            <th>出处</th>
+                            <th>组成药材</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pres-pagination"></div>
+        </section>
+
+        <!-- 药理学 -->
+        <section class="page" id="page-pharmacology">
+            <div class="page-header">
+                <h2>药理学</h2>
+                <p class="page-subtitle">浏览中药药理学作用数据</p>
+            </div>
+            <div class="toolbar">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="pharm-search" placeholder="搜索药理学名称...">
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="pharm-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>关联药材数</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pharm-pagination"></div>
+        </section>
+
+        <!-- 化学成分管理 -->
+        <section class="page" id="page-components">
+            <div class="page-header">
+                <h2>化学成分管理</h2>
+                <p class="page-subtitle">管理中药化学成分，关联来源药材</p>
+            </div>
+            <div class="toolbar">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="comp-search" placeholder="搜索成分名称、CAS号...">
+                    <select class="filter-select" id="comp-filter-herb">
+                        <option value="">全部来源药材</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="ComponentsPage.openForm()">+ 新增成分</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="comp-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>分子式</th>
+                            <th>CAS号</th>
+                            <th>来源药材</th>
+                            <th>生物活性</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="comp-pagination"></div>
+        </section>
+
+        <!-- 药理研究管理 -->
+        <section class="page" id="page-studies">
+            <div class="page-header">
+                <h2>药理研究管理</h2>
+                <p class="page-subtitle">管理药理研究记录，关联药材与成分</p>
+            </div>
+            <div class="toolbar">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="study-search" placeholder="搜索研究标题、作用...">
+                    <select class="filter-select" id="study-filter-herb">
+                        <option value="">全部关联药材</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="StudiesPage.openForm()">+ 新增研究</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="study-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>关联药材</th>
+                            <th>关联成分</th>
+                            <th>药理作用</th>
+                            <th>参考文献</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="study-pagination"></div>
+        </section>
+
+        <!-- 数据导入 -->
+        <section class="page" id="page-import">
+            <div class="page-header">
+                <h2>数据导入</h2>
+                <p class="page-subtitle">支持 CSV / JSON / Excel 格式批量导入数据</p>
+            </div>
+            <div class="card import-card">
+                <div class="import-zone" id="import-zone">
+                    <div class="import-zone-content">
+                        <span class="import-icon">&#10514;</span>
+                        <p class="import-text">拖拽文件到此处，或点击选择文件</p>
+                        <p class="import-hint">支持 CSV、JSON、Excel (.xlsx) 格式</p>
+                        <input type="file" id="import-file-input" accept=".csv,.json,.xlsx,.xls" hidden>
+                        <button class="btn btn-outline" onclick="document.getElementById('import-file-input').click()">选择文件</button>
+                    </div>
+                </div>
+                <div class="import-options">
+                    <div class="form-group">
+                        <label>文件类型</label>
+                        <select id="import-file-type">
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>导入目标</label>
+                        <select id="import-entity-type">
+                            <option value="herb">中药药材</option>
+                            <option value="tcmbank">TCMBank 药材导入</option>
+                            <option value="prescription">方剂</option>
+                            <option value="component">化学成分</option>
+                            <option value="study">药理研究</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="import-preview" class="import-preview" style="display:none;">
+                    <h4>数据预览</h4>
+                    <div class="table-container" style="max-height:300px;">
+                        <table class="data-table" id="import-preview-table">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="import-preview-footer">
+                        <span id="import-preview-count"></span>
+                        <button class="btn btn-primary" id="import-confirm-btn">确认导入</button>
+                        <button class="btn btn-outline" id="import-cancel-btn">取消</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 病症管理 -->
+        <section class="page" id="page-diseases">
+            <div class="page-header">
+                <h2>病症管理</h2>
+                <p class="page-subtitle">管理中医药病症信息，关联治疗药材与方剂</p>
+            </div>
+            <div class="toolbar">
+                <div class="search-row">
+                    <input type="text" class="search-input" id="disease-search" placeholder="搜索病症名称...">
+                    <button class="btn btn-primary" onclick="DiseasesPage.openForm()">+ 新增病症</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="disease-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>分类</th>
+                            <th>中医证型</th>
+                            <th>描述</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="pagination" id="disease-pagination"></div>
+        </section>
+
+        <!-- 知识图谱 -->
+        <section class="page" id="page-graph">
+            <div class="page-header">
+                <h2>知识图谱</h2>
+                <p class="page-subtitle">可视化中医药实体关系网络，支持 Neo4j 实时同步</p>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card card-chart" style="grid-column:1;">
+                    <h3 class="card-title">图谱关系网络</h3>
+                    <div class="graph-controls">
+                        <select id="graph-entity-type" onchange="GraphPage.loadGraph()">
+                            <option value="">选择实体类型</option>
+                            <option value="herb">药材</option>
+                            <option value="prescription">方剂</option>
+                            <option value="disease">病症</option>
+                        </select>
+                        <select id="graph-entity-id" onchange="GraphPage.loadGraph()">
+                            <option value="">选择具体实体</option>
+                        </select>
+                    </div>
+                    <canvas id="graphCanvas" width="600" height="400"></canvas>
+                </div>
+                <div class="card">
+                    <h3 class="card-title">图谱统计</h3>
+                    <div id="graph-stats"></div>
+                    <div id="neo4j-status" style="margin-top:12px;padding:8px;background:rgba(26,60,52,0.04);border-radius:4px;"></div>
+                    <button class="btn btn-outline" onclick="GraphPage.exportGraph()" style="margin-top:12px;">
+                        &#9733; 同步到 Neo4j</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 智能问答 -->
+        <section class="page" id="page-qa">
+            <div class="page-header">
+                <h2>智能问答</h2>
+                <p class="page-subtitle">Agnes AI 大模型驱动 · RAG 增强中医药知识问答</p>
+            </div>
+            <div class="qa-container">
+                <div class="card qa-chat" id="qa-messages">
+                    <div class="qa-welcome">
+                        <div class="qa-welcome-icon">&#128172;</div>
+                        <p>您好！我是中医药知识助手，由 Agnes AI 大模型驱动。</p>
+                        <p class="qa-hint">您可以询问药材功效、方剂组成、药理作用等问题。</p>
+                    </div>
+                </div>
+                <div class="qa-input-row">
+                    <input type="text" class="qa-input" id="qa-input" placeholder="输入您的中医药问题..." onkeydown="if(event.key==='Enter')QAPage.ask()">
+                    <select class="qa-model-select" id="qa-model-select"></select>
+                    <button class="btn btn-primary" onclick="QAPage.ask()">提问</button>
+                </div>
+                <div class="qa-history" id="qa-history-section">
+                    <h4 style="margin-bottom:12px;">问答记录</h4>
+                    <div id="qa-history-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 模态框容器 -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close" onclick="Modal.close()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/herbs.js"></script>
+    <script src="/static/js/prescriptions.js"></script>
+    <script src="/static/js/pharmacology.js"></script>
+    <script src="/static/js/components.js"></script>
+    <script src="/static/js/studies.js"></script>
+    <script src="/static/js/diseases.js"></script>
+    <script src="/static/js/graph.js"></script>
+    <script src="/static/js/qa.js"></script>
+    <script src="/static/js/import.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

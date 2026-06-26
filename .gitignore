@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Database files
+*.db
+
+# Logs
+*.log
+server_log.txt
+
+# IDE
+.vscode/
+.idea/
+.trae/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data import files (large CSVs)
+neo4j_import/
+
+# Environment
+.env
+.venv/
+venv/
